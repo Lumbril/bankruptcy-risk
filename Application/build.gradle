@@ -34,6 +34,8 @@ javafx {
 }
 
 dependencies {
+    implementation("org.hibernate:hibernate-core:6.1.7.Final")
+    implementation("com.h2database:h2:2.1.214")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
