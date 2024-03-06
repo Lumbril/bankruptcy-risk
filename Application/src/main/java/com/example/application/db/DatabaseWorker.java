@@ -1,12 +1,15 @@
 package com.example.application.db;
 
+import com.example.application.models.Criterion;
 import com.example.application.models.ModelList;
+import com.example.application.models.ModelWithCriterion;
 
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DatabaseWorker {
     public static String DATABASE_DRIVER = "org.h2.Driver";
@@ -103,6 +106,46 @@ public class DatabaseWorker {
         return models;
     }
 
+    public static Long getIdModel(String nameModel) throws SQLException, ClassNotFoundException {
+        Connection connection = getConnection();
+
+        String query = "select * from model where model.name = '" + nameModel + "'";
+        PreparedStatement statement = connection.prepareStatement(query);
+        ResultSet resultSet = statement.executeQuery();
+        resultSet.next();
+        Long id = resultSet.getLong("id");
+
+        statement.close();
+        connection.close();
+
+        return id;
+    }
+
+    public static void addCriterionToModel(Set<String> modelNames) throws SQLException, ClassNotFoundException {
+        Connection connection = getConnection();
+
+        for (String modelName: modelNames) {
+            Long modelId = getIdModel(modelName);
+            List<Criterion> criterionList = ModelList.modelWithCriterionMap.get(modelName)
+                    .getCriterionList();
+            StringBuilder values = new StringBuilder();
+
+            for (Criterion criterion: criterionList) {
+                values.append("(" + modelId + ", " + criterion.getBottomLine() + ", " + criterion.getUpperLine() + ", '" + criterion.getDescription()  + "'),");
+            }
+            values.deleteCharAt(values.length() - 1);
+
+            String query = "insert into model_evaluation_criterion (model_id, bottom_line, upper_line, description)\n" +
+                    "VALUES \n" +
+                    values;
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.execute();
+            statement.close();
+        }
+
+        connection.close();
+    }
+
     public static void createModelsInDb(Set<String> modelNames) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
 
@@ -120,6 +163,8 @@ public class DatabaseWorker {
         PreparedStatement statement = connection.prepareStatement(query);
         statement.execute();
 
+        addCriterionToModel(modelNames);
+
         statement.close();
         connection.close();
     }
@@ -130,7 +175,7 @@ public class DatabaseWorker {
         modelNames.removeAll(modelsInDb);
 
         if (!modelNames.isEmpty()) {
-            createModelsInDb(ModelList.modelNames);
+            createModelsInDb(modelNames);
         }
     }
 
