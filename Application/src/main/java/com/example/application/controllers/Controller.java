@@ -1,6 +1,8 @@
 package com.example.application.controllers;
 
 import com.example.application.db.DatabaseWorker;
+import com.example.application.excel.ExcelReader;
+import com.example.application.models.ModelList;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -43,8 +45,9 @@ public class Controller {
 
     @FXML
     protected void onGetReportClick() {
-        if (pathToFile.getText().trim().isEmpty() ||
-            pathToFile.getText() == null) {
+        String filePath = pathToFile.getText();
+
+        if (filePath.trim().isEmpty() || filePath == null) {
             return;
         }
 
@@ -53,8 +56,11 @@ public class Controller {
         }
 
         String modelNameSelected = models.getValue().toString();
-
         // Method for read data from excel
+        ExcelReader.getData(filePath);
+
+        // Method for get result
+        double result = ModelList.modelFunctions.get(modelNameSelected).getResult(1, 2, 3);
 
         // Method for save data in database
 

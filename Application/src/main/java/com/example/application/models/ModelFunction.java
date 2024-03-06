@@ -1,5 +1,5 @@
 package com.example.application.models;
 
-interface ModelFunction {
+public interface ModelFunction {
     double getResult(double ... data);
 }
