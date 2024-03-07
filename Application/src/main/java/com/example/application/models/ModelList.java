@@ -7,7 +7,7 @@ public class ModelList {
             List.of(new Criterion(null, .15, "1 год до банкротства"),
                     new Criterion(.15, .4, "5 лет до банкротства"),
                     new Criterion(.4, null, "Благоприятная группа")));
-    public static ModelWithCriterion modelAltman = new ModelWithCriterion("Модель Альтмана (2)",
+    public static ModelWithCriterion modelAltman = new ModelWithCriterion(ModelAltman.NAME,
             List.of(new Criterion(null, 0., "Низкий риск банкротства"),
                     new Criterion(0., null, "Есть риск банкротства")));
 

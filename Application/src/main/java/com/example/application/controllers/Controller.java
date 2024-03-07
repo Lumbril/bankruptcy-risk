@@ -1,7 +1,9 @@
 package com.example.application.controllers;
 
 import com.example.application.db.DatabaseWorker;
+import com.example.application.entity.FinancialIndicators;
 import com.example.application.excel.ExcelReader;
+import com.example.application.models.ModelFunction;
 import com.example.application.models.ModelList;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -23,6 +25,9 @@ public class Controller {
 
     @FXML
     private CheckBox drawGraphCheckBox;
+
+    @FXML
+    private TextField amortizationTF;
 
     @FXML
     public void initialize() throws SQLException, ClassNotFoundException {
@@ -56,11 +61,27 @@ public class Controller {
         }
 
         String modelNameSelected = models.getValue().toString();
-        // Method for read data from excel
-        ExcelReader.getData(filePath);
+
+        FinancialIndicators financialIndicators = ExcelReader.getData(filePath);
+
+        String amortizationStr = amortizationTF.getText();
+
+        if (!amortizationStr.trim().isEmpty() &&
+                amortizationStr != null) {
+
+            if (ExcelReader.isNumeric(amortizationStr)) {
+                financialIndicators.setAmortization(Double.parseDouble(amortizationStr));
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
 
         // Method for get result
-        double result = ModelList.modelFunctions.get(modelNameSelected).getResult(1, 2, 3);
+        ModelFunction modelFunction = ModelList.modelFunctions.get(modelNameSelected);
+        double result = modelFunction.getResult(financialIndicators);
+        String description = modelFunction.getDescription(result);
 
         // Method for save data in database
 

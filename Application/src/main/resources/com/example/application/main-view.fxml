@@ -5,11 +5,13 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="200.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.application.controllers.Controller">
    <children>
+      <TextField fx:id="amortizationTF" layoutX="15.0" layoutY="100.0" prefHeight="25.0" prefWidth="114.0" />
       <TextField fx:id="pathToFile" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="204.0" />
       <Button fx:id="openExplorer" layoutX="237.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenExplorerClick" text="Выбрать файл" />
       <ComboBox fx:id="models" layoutX="14.0" layoutY="59.0" prefWidth="150.0" />
       <Label layoutX="179.0" layoutY="63.0" text="Выбрать модели расчета" />
-      <CheckBox fx:id="drawGraphCheckBox" layoutX="14.0" layoutY="105.0" mnemonicParsing="false" text="Рисовать график" />
+      <CheckBox fx:id="drawGraphCheckBox" layoutX="14.0" layoutY="135.0" mnemonicParsing="false" text="Рисовать график" />
       <Button fx:id="getReport" layoutX="149.0" layoutY="161.0" mnemonicParsing="false" onAction="#onGetReportClick" text="Получить отчет" />
+      <Label layoutX="142.0" layoutY="104.0" text="Амортизация" />
    </children>
 </Pane>

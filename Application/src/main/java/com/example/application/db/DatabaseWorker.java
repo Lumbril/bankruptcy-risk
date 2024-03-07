@@ -1,14 +1,12 @@
 package com.example.application.db;
 
+import com.example.application.entity.ModelEvaluationCriterion;
 import com.example.application.models.Criterion;
 import com.example.application.models.ModelList;
 import com.example.application.models.ModelWithCriterion;
 
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DatabaseWorker {
@@ -183,5 +181,36 @@ public class DatabaseWorker {
         createOrUpdateModelsInDb();
 
         return getModelsFromDb().stream().toList();
+    }
+
+    public static List<ModelEvaluationCriterion> getModelEvaluationCriteria(String modelName) throws SQLException, ClassNotFoundException {
+        List<ModelEvaluationCriterion> modelEvaluationCriteria = new ArrayList<>();
+
+        Connection connection = getConnection();
+        String query = "select BOTTOM_LINE, UPPER_LINE, DESCRIPTION\n" +
+                "from MODEL_EVALUATION_CRITERION\n" +
+                "left join MODEL on MODEL_EVALUATION_CRITERION.MODEL_ID = MODEL.ID\n" +
+                "where MODEL.NAME = '" + modelName + "'";
+        PreparedStatement statement = connection.prepareStatement(query);
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+            modelEvaluationCriteria.add(new ModelEvaluationCriterion(
+                    getDouble(resultSet, "BOTTOM_LINE"),
+                    getDouble(resultSet, "UPPER_LINE"),
+                    resultSet.getString("DESCRIPTION")
+            ));
+        }
+
+        statement.close();
+        connection.close();
+
+        return  modelEvaluationCriteria;
+    }
+
+    private static Double getDouble(ResultSet resultSet, String fieldName) throws SQLException {
+        double val = resultSet.getDouble(fieldName);
+
+        return resultSet.wasNull() ? null : val;
     }
 }
