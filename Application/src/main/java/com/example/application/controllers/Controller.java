@@ -7,6 +7,7 @@ import com.example.application.models.ModelFunction;
 import com.example.application.models.ModelList;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
@@ -49,7 +50,7 @@ public class Controller {
     }
 
     @FXML
-    protected void onGetReportClick() {
+    protected void onGetReportClick() throws SQLException, ClassNotFoundException {
         String filePath = pathToFile.getText();
 
         if (filePath.trim().isEmpty() || filePath == null) {
@@ -84,6 +85,13 @@ public class Controller {
         String description = modelFunction.getDescription(result);
 
         // Method for save data in database
+        DatabaseWorker.saveReport(financialIndicators, modelNameSelected, result, description);
+
+        // Method to display the result
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Результат");
+        alert.setHeaderText(description);
+        alert.show();
 
         if (drawGraphCheckBox.isSelected()) {
             // draw graph

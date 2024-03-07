@@ -1,11 +1,14 @@
 package com.example.application.db;
 
+import com.example.application.entity.FinancialIndicators;
 import com.example.application.entity.ModelEvaluationCriterion;
 import com.example.application.models.Criterion;
 import com.example.application.models.ModelList;
 import com.example.application.models.ModelWithCriterion;
 
 import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,6 +50,20 @@ public class DatabaseWorker {
                 "(\n" +
                 "    id            INTEGER not null AUTO_INCREMENT,\n" +
                 "    enterprise_id INTEGER,\n" +
+                "    net_profit DOUBLE,\n" +
+                "    borrowed_funds DOUBLE,\n" +
+                "    current_assets DOUBLE,\n" +
+                "    short_term_liabilities DOUBLE,\n" +
+                "    long_term_duties DOUBLE,\n" +
+                "    equity DOUBLE,\n" +
+                "    net_loss DOUBLE,\n" +
+                "    accounts_payable DOUBLE,\n" +
+                "    accounts_receivable DOUBLE,\n" +
+                "    most_liquid_assets DOUBLE,\n" +
+                "    volume_of_sales DOUBLE,\n" +
+                "    own_sources_financing DOUBLE,\n" +
+                "    balance_currency DOUBLE,\n" +
+                "    revenue DOUBLE,\n" +
                 "    date          date,\n" +
                 "    constraint financial_indicators_pk\n" +
                 "        primary key (id),\n" +
@@ -206,6 +223,156 @@ public class DatabaseWorker {
         connection.close();
 
         return  modelEvaluationCriteria;
+    }
+
+    public static void saveReport(FinancialIndicators financialIndicators, String modelName,
+                                  Double result, String description) throws SQLException, ClassNotFoundException {
+        Long enterpriseId = createOrGetEnterpriseId(financialIndicators.getEnterprise());
+        Long financialIndicatorsId = createFinancialIndicators(financialIndicators, enterpriseId);
+
+        Long modelId = getIdModel(modelName);
+
+        createReport(modelId, financialIndicatorsId, result, description);
+    }
+
+    private static void createReport(Long modelId, Long financialIndicatorsId, Double result, String description) throws SQLException, ClassNotFoundException {
+        if (notReportExists(modelId, financialIndicatorsId)) {
+            Connection connection = getConnection();
+            String query = "INSERT INTO REPORT (MODEL_ID, FINANCIAL_INDICATOR_ID, RESULT, DESCRIPTION) \n" +
+                    "VALUES (?, ?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setLong(1, modelId);
+            statement.setLong(2, financialIndicatorsId);
+            statement.setDouble(3, result);
+            statement.setString(4, description);
+            statement.execute();
+            statement.close();
+            connection.close();
+        }
+    }
+
+    private static boolean notReportExists(Long modelId, Long financialIndicatorsId) throws SQLException, ClassNotFoundException {
+        Connection connection = getConnection();
+        String query = "select id from report where report.model_id = ? and report.financial_indicator_id = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setLong(1, modelId);
+        statement.setLong(2, financialIndicatorsId);
+        ResultSet resultSet = statement.executeQuery();
+
+        boolean f = !resultSet.next();
+
+        statement.close();
+        connection.close();
+
+        return f;
+    }
+
+    private static Long createFinancialIndicators(FinancialIndicators financialIndicators, Long enterpriseId) throws SQLException, ClassNotFoundException {
+        if (notExistsFinancialIndicatorsByDate(financialIndicators.getDate())) {
+            Connection connection = getConnection();
+            String query = "INSERT INTO FINANCIAL_INDICATORS \n" +
+                    "(enterprise_id, net_profit, borrowed_funds, current_assets, short_term_liabilities, long_term_duties," +
+                    "equity, net_loss, accounts_payable, accounts_receivable, most_liquid_assets, volume_of_sales," +
+                    "own_sources_financing, balance_currency, revenue, date) \n" +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            statement.setLong(1, enterpriseId);
+            statement.setDouble(2, financialIndicators.getNetProfit());
+            statement.setDouble(3, financialIndicators.getBorrowedFunds());
+            statement.setDouble(4, financialIndicators.getCurrentAssets());
+            statement.setDouble(5, financialIndicators.getShortTermLiabilities());
+            statement.setDouble(6, financialIndicators.getLongTermDuties());
+            statement.setDouble(7, financialIndicators.getEquity());
+            statement.setDouble(8, financialIndicators.getNetLoss());
+            statement.setDouble(9, financialIndicators.getAccountsPayable());
+            statement.setDouble(10, financialIndicators.getAccountsReceivable());
+            statement.setDouble(11, financialIndicators.getMostLiquidAssets());
+            statement.setDouble(12, financialIndicators.getVolumeOfSales());
+            statement.setDouble(13, financialIndicators.getOwnSourcesFinancing());
+            statement.setDouble(14, financialIndicators.getBalanceCurrency());
+            statement.setDouble(15, financialIndicators.getRevenue());
+            statement.setDate(16, Date.valueOf(financialIndicators.getDate()));
+            statement.executeUpdate();
+
+            ResultSet resultSet = statement.getGeneratedKeys();
+            Long id = resultSet.next() ? resultSet.getLong(1) : null;
+
+            statement.close();
+            connection.close();
+
+            return id;
+        }
+
+        return getFinancialIndicatorsId(enterpriseId, financialIndicators.getDate());
+    }
+
+    private static Long getFinancialIndicatorsId(Long enterpriseId, LocalDate date) throws SQLException, ClassNotFoundException {
+        Connection connection = getConnection();
+        String query = "select id from financial_indicators where financial_indicators.enterprise_id = ? and financial_indicators.date = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setLong(1, enterpriseId);
+        statement.setDate(2, Date.valueOf(date));
+        ResultSet resultSet = statement.executeQuery();
+
+        Long id = null;
+
+        if (resultSet.next()) {
+            id = resultSet.getLong("id");
+        }
+
+        return id;
+    }
+
+    private static boolean notExistsFinancialIndicatorsByDate(LocalDate date) throws SQLException, ClassNotFoundException {
+        Connection connection = getConnection();
+        String query = "SELECT id FROM FINANCIAL_INDICATORS WHERE FINANCIAL_INDICATORS.date = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setDate(1, Date.valueOf(date));
+        ResultSet resultSet = statement.executeQuery();
+
+        boolean f = !resultSet.next();
+
+        statement.close();
+        connection.close();
+
+        return f;
+    }
+
+    private static Long createOrGetEnterpriseId(String enterprise) throws SQLException, ClassNotFoundException {
+        Long id = getEnterpriseId(enterprise);
+
+        if (id != null) {
+            return id;
+        }
+
+        Connection connection = getConnection();
+        String query = "INSERT INTO ENTERPRISE (name)\n" +
+                "VALUES (?)";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, enterprise);
+        statement.execute();
+        statement.close();
+        connection.close();
+
+        id = getEnterpriseId(enterprise);
+
+        return id;
+    }
+
+    private static Long getEnterpriseId(String enterprise) throws SQLException, ClassNotFoundException {
+        Connection connection = getConnection();
+
+        String query = "SELECT * FROM ENTERPRISE WHERE ENTERPRISE.NAME = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, enterprise);
+        ResultSet resultSet = statement.executeQuery();
+
+        Long id = resultSet.next() ? resultSet.getLong("id") : null;
+
+        statement.close();
+        connection.close();
+
+        return id;
     }
 
     private static Double getDouble(ResultSet resultSet, String fieldName) throws SQLException {
