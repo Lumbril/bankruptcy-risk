@@ -1,5 +1,6 @@
 package com.example.application.controllers;
 
+import com.example.application.Application;
 import com.example.application.db.DatabaseWorker;
 import com.example.application.entity.FinancialIndicators;
 import com.example.application.excel.ExcelReader;
@@ -7,13 +8,18 @@ import com.example.application.models.ModelFunction;
 import com.example.application.models.ModelList;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.List;
 
@@ -50,7 +56,7 @@ public class Controller {
     }
 
     @FXML
-    protected void onGetReportClick() throws SQLException, ClassNotFoundException {
+    protected void onGetReportClick() throws SQLException, ClassNotFoundException, IOException {
         String filePath = pathToFile.getText();
 
         if (filePath.trim().isEmpty() || filePath == null) {
@@ -91,11 +97,18 @@ public class Controller {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Результат");
         alert.setHeaderText(description);
-        alert.show();
+        alert.showAndWait();
 
         if (drawGraphCheckBox.isSelected()) {
-            // draw graph
-            System.out.println("Graph");
+            GraphController.modelName = modelNameSelected;
+            GraphController.enterpriseName = financialIndicators.getEnterprise();
+            FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("graph-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(),600, 400);
+            Stage stage = new Stage();
+            stage.setTitle("График");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.show();
         }
     }
 }

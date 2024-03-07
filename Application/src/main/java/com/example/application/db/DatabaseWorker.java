@@ -2,6 +2,7 @@ package com.example.application.db;
 
 import com.example.application.entity.FinancialIndicators;
 import com.example.application.entity.ModelEvaluationCriterion;
+import com.example.application.entity.Report;
 import com.example.application.models.Criterion;
 import com.example.application.models.ModelList;
 import com.example.application.models.ModelWithCriterion;
@@ -379,5 +380,27 @@ public class DatabaseWorker {
         double val = resultSet.getDouble(fieldName);
 
         return resultSet.wasNull() ? null : val;
+    }
+
+    public static List<Report> getReportListByModelAndEnterprise(String modelName, String enterpriseName) throws SQLException, ClassNotFoundException {
+        List<Report> reportList = new ArrayList<>();
+
+        Long modelId = getIdModel(modelName);
+        Long enterpriseId = getEnterpriseId(enterpriseName);
+
+        Connection connection = getConnection();
+        String query = "select result, date from REPORT \n " +
+                "left join FINANCIAL_INDICATORS on REPORT.FINANCIAL_INDICATOR_ID = FINANCIAL_INDICATORS.ID\n " +
+                "where REPORT.MODEL_ID = ? and ENTERPRISE_ID = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setLong(1, modelId);
+        statement.setLong(2, enterpriseId);
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+            reportList.add(new Report(resultSet.getDouble("result"), resultSet.getDate("date").toLocalDate()));
+        }
+
+        return reportList;
     }
 }
