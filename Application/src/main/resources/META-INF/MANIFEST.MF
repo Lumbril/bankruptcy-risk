@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Main-Class: com.example.application.Main
+Class-Path: log4j-api-2.14.1.jar jakarta.inject-api-2.0.0.jar txw2-3.0.2
+ .jar commons-compress-1.21.jar antlr4-runtime-4.10.1.jar javafx-control
+ s-19.jar javafx-base-19-win.jar commons-io-2.11.0.jar xmlbeans-5.0.2.ja
+ r jakarta.activation-2.0.1.jar poi-ooxml-lite-5.1.0.jar javafx-base-19.
+ jar commons-math3-3.6.1.jar jaxb-core-3.0.2.jar jakarta.xml.bind-api-3.
+ 0.1.jar SparseBitSet-1.2.jar jakarta.transaction-api-2.0.0.jar curvesap
+ i-1.06.jar jakarta.persistence-api-3.0.0.jar javafx-graphics-19.jar cla
+ ssmate-1.5.1.jar junit-jupiter-engine-5.9.1.jar istack-commons-runtime-
+ 4.0.1.jar javafx-fxml-19-win.jar javafx-controls-19-win.jar poi-ooxml-5
+ .1.0.jar commons-codec-1.15.jar jboss-logging-3.4.3.Final.jar commons-c
+ ollections4-4.4.jar javafx-graphics-19-win.jar junit-jupiter-api-5.9.1.
+ jar junit-platform-commons-1.9.1.jar hibernate-core-6.1.7.Final.jar lom
+ bok-1.18.22.jar jaxb-runtime-3.0.2.jar poi-5.1.0.jar byte-buddy-1.12.18
+ .jar jandex-2.4.2.Final.jar junit-platform-engine-1.9.1.jar opentest4j-
+ 1.2.0.jar h2-2.1.214.jar hibernate-commons-annotations-6.0.6.Final.jar
+
